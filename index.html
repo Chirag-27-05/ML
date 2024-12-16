@@ -10,6 +10,33 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
+    <style>
+      .shimmer {
+        display: inline-block;
+        color: white;
+        background: #222222 -webkit-gradient(linear, 100% 0, 0 0, from(#acacac), color-stop(0.5, #ffffff), to(#acacac));
+        background-position: -6rem top;
+        background-repeat: no-repeat;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        -webkit-animation-name: shimmer;
+        -webkit-animation-duration: 1.8s;
+        -webkit-animation-iteration-count: 1;
+        -webkit-background-size: 4rem 100%;
+      }
+
+      @-webkit-keyframes shimmer {
+        0% {
+          background-position: -4rem top;
+        }
+        70% {
+          background-position: 24.5rem top;
+        }
+        100% {
+          background-position: 24.5rem top;
+        }
+      }
+    </style>
   </head>
   <body class="bg-white text-black flex flex-col items-center justify-center min-h-screen">
     <!-- Main Container -->
@@ -19,7 +46,9 @@
 
       <!-- Title and Author -->
       <div class="mb-5">
-        <h1 class="text-4xl font-bold text-black mb-1 tracking-tighter">The Idea Of A Perceptron</h1>
+        <h1 class="text-4xl font-bold shimmer mb-1 tracking-tighter">
+          The Idea Of A Perceptron
+        </h1>
         <p class="text-gray-600 text-lg font-semibold">Chirag Jalade</p>
       </div>
 
