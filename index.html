@@ -37,6 +37,22 @@
           background-position: 23.5rem top;
         }
       }
+
+      .image-container {
+        position: relative;
+        overflow: hidden; /* Ensures the image stays inside the container */
+      }
+
+      .image-container img {
+        transition: transform 1.2s ease-in-out, opacity 1.2s ease-in-out; /* Smooth transition for zoom and fade */
+        transform: scale(1.1); /* Initial zoom-out state */
+        opacity: 0; /* Initially hidden */
+      }
+
+      .image-container img.visible {
+        transform: scale(1); /* Zooms to original size */
+        opacity: 1; /* Becomes visible */
+      }
     </style>
   </head>
   <body class="bg-white text-black flex flex-col items-center justify-center min-h-screen">
@@ -70,7 +86,7 @@
       </div>
 
       <!-- Image Container -->
-      <div class="relative flex justify-center items-center max-w-md mt-5">
+      <div class="image-container relative flex justify-center items-center max-w-md mt-5">
         <img
           src="images/perceptron.png"
           alt="Perceptron Visual Representation"
@@ -135,5 +151,23 @@
         }
       }
     </style>
+
+    <!-- Script for Image Reveal -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const img = document.querySelector(".image-container img");
+
+        const revealImage = () => {
+          const rect = img.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom >= 0) {
+            img.classList.add("visible");
+            window.removeEventListener("scroll", revealImage); // Remove the event listener after reveal
+          }
+        };
+
+        window.addEventListener("scroll", revealImage);
+        revealImage(); // Trigger on page load
+      });
+    </script>
   </body>
 </html>
