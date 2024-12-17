@@ -1,1 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Idea of a Perceptron</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      .shimmer {
+        display: inline-block;
+        color: white;
+        background: #222222 -webkit-gradient(linear, 100% 0, 0 0, from(#acacac), color-stop(0.5, #ffffff), to(#acacac));
+        background-position: -6rem top;
+        background-repeat: no-repeat;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        -webkit-animation-name: shimmer;
+        -webkit-animation-delay: 0.68s;
+        -webkit-animation-duration: 2.2s;
+        -webkit-animation-iteration-count: 1;
+        -webkit-background-size: 4rem 100%;
+      }
+
+      @-webkit-keyframes shimmer {
+        0% {
+          background-position: -4rem top;
+        }
+        70% {
+          background-position: 23.5rem top;
+        }
+        100% {
+          background-position: 23.5rem top;
+        }
+      }
+
+      .image-container {
+        position: relative;
+        overflow: hidden; /* Ensures the image stays inside the container */
+      }
+
+      .image-container img {
+        transition: transform 1.2s ease-in-out, opacity 1.2s ease-in-out; /* Smooth transition for zoom and fade */
+        transform: scale(1.1); /* Initial zoom-out state */
+        opacity: 0; /* Initially hidden */
+      }
+
+      .image-container img.visible {
+        transform: scale(1); /* Zooms to original size */
+        opacity: 1; /* Becomes visible */
+      }
+    </style>
+  </head>
+  <body class="bg-white text-black flex flex-col items-center justify-center min-h-screen">
+    <!-- Main Container -->
+    <main class="flex flex-col items-center justify-center text-center p-5 w-full min-h-screen pt-20">
+      <!-- Date -->
+      <p class="text-gray-600 text-sm font-semibold tracking-tight mb-2">16/12/2024</p>
+
+      <!-- Title and Author -->
+      <div class="mb-5">
+        <h1 class="text-4xl font-bold shimmer mb-1 tracking-tighter">
+          The Idea Of A Perceptron
+        </h1>
+        <p class="text-gray-600 text-lg font-semibold">Chirag Jalade</p>
+      </div>
+
+      <!-- New Text Divs with Icons -->
+      <div class="flex justify-center space-x-8 mb-0">
+        <!-- Read the Docs -->
+        <div class="flex items-center space-x-2 text-gray-600 hover:text-black cursor-pointer">
+          <!-- Book Icon -->
+          <i class="fas fa-book text-black text-sm"></i>
+          <span class="text-lg">Read the Docs</span>
+        </div>
+        <!-- Read References -->
+        <div class="flex items-center space-x-2 text-gray-600 hover:text-black cursor-pointer">
+          <!-- File Icon -->
+          <i class="fas fa-file-alt text-black text-sm"></i>
+          <span class="text-lg">Read References</span>
+        </div>
+      </div>
+
+      <!-- Image Container -->
+      <div class="image-container relative flex justify-center items-center max-w-md mt-5">
+        <img
+          src="images/perceptron.png"
+          alt="Perceptron Visual Representation"
+          class="w-full h-auto block"
+        />
+        <div
+          class="absolute bottom-0 w-full h-1/4 bg-gradient-to-t from-white to-transparent pointer-events-none"
+        ></div>
+      </div>
+
+      <!-- Scroll Down Circle -->
+      <div class="mt-20 flex justify-center items-center">
+        <div class="animate-bounce w-10 h-10 border-2 border-gray-600 rounded-full flex items-center justify-center">
+          <div class="w-2 h-2 bg-gray-600 rounded-full"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Blog Section -->
+    <section
+      class="mt-10 p-5 bg-gray-100 rounded-lg shadow-md text-left max-w-3xl mx-auto"
+    >
+      <h2
+        class="text-2xl font-bold mb-3 text-gray-800 text-center tracking-tight"
+      >
+        The Birth of the Perceptron
+      </h2>
+      <p class="text-gray-700 text-base leading-relaxed mb-4 text-justify">
+        The perceptron, introduced by <strong>Frank Rosenblatt</strong> in 1958, was inspired by the structure and
+        function of the biological neuron. Neurons in the human brain process information by receiving input signals
+        through dendrites, performing computations in the cell body, and transmitting outputs via axons. Similarly, a
+        perceptron takes input values, applies weights, sums them, and passes the result through an activation function
+        to produce an output.
+      </p>
+      <p class="text-gray-700 text-base leading-relaxed mb-4 text-justify">
+        Rosenblatt's perceptron was a significant milestone in the field of artificial intelligence. It was the first
+        algorithmically described neural network model, capable of learning and recognizing patterns from data. This
+        simple yet profound model laid the groundwork for modern deep learning networks, demonstrating how machines
+        could mimic human-like decision-making inspired by the brain's neuron structure.
+      </p>
+      <p class="text-gray-700 text-base leading-relaxed text-justify">
+        While the original perceptron was limited to solving linear problems, its foundational principles evolved into
+        multi-layered networks capable of solving complex, non-linear tasks. Today, the perceptron's legacy lives on in
+        the AI systems we interact with every day.
+      </p>
+    </section>
+
+    <!-- Responsive Adjustments -->
+    <style>
+      @media (max-width: 768px) {
+        .text-4xl {
+          font-size: 1.8rem;
+        }
+        .text-lg {
+          font-size: 1rem;
+        }
+        .text-2xl {
+          font-size: 1.5rem;
+        }
+        .p-5 {
+          padding: 1.5rem;
+        }
+      }
+    </style>
+
+    <!-- Script for Image Reveal -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const img = document.querySelector(".image-container img");
+
+        const revealImage = () => {
+          const rect = img.getBoundingClientRect();
+          if (rect.top < window.innerHeight && rect.bottom >= 0) {
+            img.classList.add("visible");
+            window.removeEventListener("scroll", revealImage); // Remove the event listener after reveal
+          }
+        };
+
+        window.addEventListener("scroll", revealImage);
+        revealImage(); // Trigger on page load
+      });
+    </script>
+  </body>
+</html>
 
