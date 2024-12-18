@@ -221,6 +221,42 @@
                 font-size: 1.2rem;
             }
         }
+
+
+
+         /* Audio Control Button Styles */
+         .audio-control-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            color: white;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.2s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .audio-control-btn.visible {
+            opacity: 1;
+        }
+
+        .audio-control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .audio-control-btn i {
+            font-size: 24px;
+        }
+
     </style>
 </head>
 <body>
@@ -230,7 +266,7 @@
 
     <!-- Title and Author -->
     <div class="mb-5">
-      <h1 class="text-3xl font-bold shimmer mb-1 tracking-tighter">
+      <h1 class=" text-4xl font-bold shimmer mb-1 tracking-tighter">
         The Idea Of A Perceptron
       </h1>
 
@@ -282,6 +318,10 @@
         </div>
     </section>
 
+    <div class="audio-control-btn">
+        <i class="fas fa-play"></i>
+    </div>
+
     <script>
         // Image Reveal
         document.addEventListener("DOMContentLoaded", function () {
@@ -297,71 +337,190 @@
             revealImage();
         });
 
-        // Word-by-Word Text Reveal
         document.addEventListener("DOMContentLoaded", function () {
-            // Function to wrap words in spans
-            function wrapWordsInSpans() {
-                const paragraphs = document.querySelectorAll('.blog-content p');
-                paragraphs.forEach(paragraph => {
-                    const words = paragraph.textContent.split(/\s+/);
-                    paragraph.innerHTML = words.map(word =>
-                        `<span class="word">${word}&nbsp;</span>`
-                    ).join(''); // Wraps each word in span
+        const audioControlBtn = document.querySelector('.audio-control-btn');
+        const icon = audioControlBtn.querySelector('i');
+
+        const audioFiles = [
+            'audio/one.mp3',
+            'audio/two.mp3',
+            'audio/three.mp3'
+        ];
+
+        let currentAudio = null;
+        let isPlaying = false;
+        let currentParagraphIndex = -1;
+
+        const blogSection = document.querySelector('.blog-section');
+        const paragraphs = document.querySelectorAll('.blog-content p');
+
+        // Function to wrap words in spans
+        function wrapWordsInSpans() {
+            paragraphs.forEach(paragraph => {
+                const words = paragraph.textContent.split(/\s+/);
+                paragraph.innerHTML = words.map(word =>
+                    `<span class="word">${word}&nbsp;</span>`
+                ).join('');
+            });
+        }
+
+        // Wrap words initially
+        wrapWordsInSpans();
+
+        // Function to show or hide the floating button
+        function toggleAudioButtonVisibility() {
+            const rect = blogSection.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+
+            if (rect.top < windowHeight && rect.bottom >= 0) {
+                audioControlBtn.classList.add('visible');
+            } else {
+                audioControlBtn.classList.remove('visible');
+                if (currentAudio) currentAudio.pause();
+                resetAudioControlIcon();
+            }
+        }
+
+        // Function to reset audio control button icon
+        function resetAudioControlIcon() {
+            icon.classList.remove('fa-pause');
+            icon.classList.add('fa-play');
+            isPlaying = false;
+        }
+
+        // Function to animate the paragraph and play audio
+        async function animateParagraph(paragraphElement, audioPath, paragraphIndex) {
+            // Prevent simultaneous animations for the same paragraph
+            if (paragraphElement.classList.contains('animating')) {
+                return;
+            }
+
+            paragraphElement.classList.add('animating');
+
+            // Stop previous audio
+            if (currentAudio) {
+                currentAudio.pause();
+            }
+
+            // Reset all previous reveals
+            const words = paragraphElement.querySelectorAll('.word');
+            words.forEach(word => word.classList.remove('reveal'));
+
+            // Create and preload new audio
+            currentAudio = new Audio(audioPath);
+            currentAudio.preload = 'auto';
+            currentAudio.muted = true; // Trick to bypass autoplay policy
+
+            currentParagraphIndex = paragraphIndex;
+
+            // Update play/pause icon
+            icon.classList.remove('fa-play');
+            icon.classList.add('fa-pause');
+            isPlaying = true;
+
+            // Word reveal function with Promise to ensure sequential animation
+            async function revealWord(index) {
+                if (index < words.length) {
+                    words[index].classList.add('reveal');
+                    await new Promise(resolve => setTimeout(resolve, 180)); // Delay between word reveals
+                    await revealWord(index + 1);
+                }
+            }
+
+            // Audio end handler
+            function audioEndHandler() {
+                icon.classList.remove('fa-pause');
+                icon.classList.add('fa-play');
+                isPlaying = false;
+                currentAudio.removeEventListener('ended', audioEndHandler);
+            }
+            currentAudio.addEventListener('ended', audioEndHandler);
+
+            // Start audio muted and unmute when playing
+            try {
+                await currentAudio.play();
+                currentAudio.muted = false;
+            } catch (error) {
+                console.warn('Autoplay blocked, waiting for user interaction.', error);
+                document.addEventListener('click', function resumeAudio() {
+                    currentAudio.play();
+                    currentAudio.muted = false;
+                    document.removeEventListener('click', resumeAudio);
                 });
             }
 
-            // Wrap words
-            wrapWordsInSpans();
+            // Start the word reveal and audio simultaneously
+            await revealWord(0);
+            paragraphElement.classList.remove('animating'); // Allow next animation on the paragraph
+        }
 
-            const paragraphs = document.querySelectorAll('.blog-content p');
+        // Check which paragraph is in view
+        const observedParagraphs = new Set();
+        let inProgressAnimation = false;
 
-            function animateParagraph(paragraphElement) {
-                return new Promise((resolve) => {
-                    const words = paragraphElement.querySelectorAll('.word');
+        async function checkParagraphsInView() {
+            for (let i = 0; i < paragraphs.length; i++) {
+                const paragraph = paragraphs[i];
 
-                    function revealWord(index) {
-                        if (index < words.length) {
-                            words[index].classList.add('reveal');
-                            setTimeout(() => {
-                                revealWord(index + 1);
-                            }, 180);
-                        } else {
-                            resolve();
-                        }
+                if (isElementInViewport(paragraph) && !observedParagraphs.has(paragraph)) {
+                    // If the paragraph is in view and hasn't been animated yet
+                    observedParagraphs.add(paragraph);
+                    await animateParagraph(paragraph, audioFiles[i], i);
+                } else if (!isElementInViewport(paragraph) && observedParagraphs.has(paragraph)) {
+                    // If the paragraph is no longer in view and the animation is in progress, complete it
+                    if (paragraph.classList.contains('animating')) {
+                        await animateParagraph(paragraph, audioFiles[i], i);
                     }
-
-                    revealWord(0);
-                });
+                    observedParagraphs.delete(paragraph);
+                }
             }
+        }
 
-            function isElementInViewport(el) {
-                const rect = el.getBoundingClientRect();
-                const windowHeight = window.innerHeight;
-                return rect.top < windowHeight * 0.90 && rect.bottom >= 0;
+        // Function to reset the paragraph animation
+        function resetParagraphAnimation(paragraph) {
+            const words = paragraph.querySelectorAll('.word');
+            words.forEach(word => word.classList.remove('reveal')); // Remove the reveal class
+        }
+
+        // Utility function to check if an element is in the viewport
+        function isElementInViewport(el) {
+            const rect = el.getBoundingClientRect();
+            return rect.top < window.innerHeight * 0.9 && rect.bottom >= 0;
+        }
+
+        // Throttled scroll event
+        let rafId = null;
+        function onScroll() {
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+                toggleAudioButtonVisibility();
+                checkParagraphsInView();
+            });
+        }
+
+        // Audio control button behavior
+        audioControlBtn.addEventListener('click', () => {
+            if (currentAudio) {
+                if (isPlaying) {
+                    currentAudio.pause();
+                    resetAudioControlIcon();
+                } else {
+                    currentAudio.play();
+                    icon.classList.remove('fa-play');
+                    icon.classList.add('fa-pause');
+                    isPlaying = true;
+                }
             }
-
-            const observedParagraphs = new Set();
-
-            function checkParagraphsInView() {
-                paragraphs.forEach(paragraph => {
-                    // Check if paragraph is in view and not already animated
-                    if (isElementInViewport(paragraph) && !observedParagraphs.has(paragraph)) {
-                        observedParagraphs.add(paragraph);
-                        animateParagraph(paragraph);
-                    }
-                });
-            }
-
-            // Throttle scroll event
-            let rafId = null;
-            function throttledParagraphCheck() {
-                if (rafId) cancelAnimationFrame(rafId);
-                rafId = requestAnimationFrame(checkParagraphsInView);
-            }
-
-            window.addEventListener('scroll', throttledParagraphCheck);
-            checkParagraphsInView(); // Initial check
         });
-    </script>
+
+        // Initial checks
+        window.addEventListener('scroll', onScroll);
+        window.addEventListener('resize', onScroll);
+        toggleAudioButtonVisibility();
+        checkParagraphsInView();
+    });
+</script>
+</script>
+    
 </body>
 </html>
