@@ -142,14 +142,18 @@
             gap: 0.1rem;
         }
 
-        .word {
+        .word{
             position: relative;
-            color: rgba(0, 0, 0, 0.2);
-            transition: color 0.5s ease-in-out;
+            color: rgb(188, 188, 188);
+            opacity: 0.4;
+            transform: translateY(10px);
+            transition: color 0.5s ease-in-out, opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }
 
-        .word.reveal {
+        .word.reveal{
             color: rgba(0, 0, 0, 1);
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .shimmer {
@@ -338,187 +342,227 @@
         });
 
         document.addEventListener("DOMContentLoaded", function () {
-        const audioControlBtn = document.querySelector('.audio-control-btn');
-        const icon = audioControlBtn.querySelector('i');
+            const audioControlBtn = document.querySelector('.audio-control-btn');
+            const icon = audioControlBtn.querySelector('i');
 
-        const audioFiles = [
-            'audio/one.mp3',
-            'audio/two.mp3',
-            'audio/three.mp3'
-        ];
+            const audioFiles = [
+                'audio/one.mp3',
+                'audio/two.mp3',
+                'audio/three.mp3'
+            ];
 
-        let currentAudio = null;
-        let isPlaying = false;
-        let currentParagraphIndex = -1;
+            let currentAudio = null;
+            let isPlaying = false;
+            let currentParagraphIndex = -1;
+            let animationTimeout = null;
+            let currentWordIndex = 0;
+            let lastScrollTop = 0; // Track scroll direction
+            
 
-        const blogSection = document.querySelector('.blog-section');
-        const paragraphs = document.querySelectorAll('.blog-content p');
+            const blogSection = document.querySelector('.blog-section');
+            const paragraphs = document.querySelectorAll('.blog-content p');
 
-        // Function to wrap words in spans
-        function wrapWordsInSpans() {
-            paragraphs.forEach(paragraph => {
-                const words = paragraph.textContent.split(/\s+/);
-                paragraph.innerHTML = words.map(word =>
-                    `<span class="word">${word}&nbsp;</span>`
-                ).join('');
-            });
-        }
-
-        // Wrap words initially
-        wrapWordsInSpans();
-
-        // Function to show or hide the floating button
-        function toggleAudioButtonVisibility() {
-            const rect = blogSection.getBoundingClientRect();
-            const windowHeight = window.innerHeight;
-
-            if (rect.top < windowHeight && rect.bottom >= 0) {
-                audioControlBtn.classList.add('visible');
-            } else {
-                audioControlBtn.classList.remove('visible');
-                if (currentAudio) currentAudio.pause();
-                resetAudioControlIcon();
-            }
-        }
-
-        // Function to reset audio control button icon
-        function resetAudioControlIcon() {
-            icon.classList.remove('fa-pause');
-            icon.classList.add('fa-play');
-            isPlaying = false;
-        }
-
-        // Function to animate the paragraph and play audio
-        async function animateParagraph(paragraphElement, audioPath, paragraphIndex) {
-            // Prevent simultaneous animations for the same paragraph
-            if (paragraphElement.classList.contains('animating')) {
-                return;
-            }
-
-            paragraphElement.classList.add('animating');
-
-            // Stop previous audio
-            if (currentAudio) {
-                currentAudio.pause();
-            }
-
-            // Reset all previous reveals
-            const words = paragraphElement.querySelectorAll('.word');
-            words.forEach(word => word.classList.remove('reveal'));
-
-            // Create and preload new audio
-            currentAudio = new Audio(audioPath);
-            currentAudio.preload = 'auto';
-            currentAudio.muted = true; // Trick to bypass autoplay policy
-
-            currentParagraphIndex = paragraphIndex;
-
-            // Update play/pause icon
-            icon.classList.remove('fa-play');
-            icon.classList.add('fa-pause');
-            isPlaying = true;
-
-            // Word reveal function with Promise to ensure sequential animation
-            async function revealWord(index) {
-                if (index < words.length) {
-                    words[index].classList.add('reveal');
-                    await new Promise(resolve => setTimeout(resolve, 180)); // Delay between word reveals
-                    await revealWord(index + 1);
-                }
-            }
-
-            // Audio end handler
-            function audioEndHandler() {
-                icon.classList.remove('fa-pause');
-                icon.classList.add('fa-play');
-                isPlaying = false;
-                currentAudio.removeEventListener('ended', audioEndHandler);
-            }
-            currentAudio.addEventListener('ended', audioEndHandler);
-
-            // Start audio muted and unmute when playing
-            try {
-                await currentAudio.play();
-                currentAudio.muted = false;
-            } catch (error) {
-                console.warn('Autoplay blocked, waiting for user interaction.', error);
-                document.addEventListener('click', function resumeAudio() {
-                    currentAudio.play();
-                    currentAudio.muted = false;
-                    document.removeEventListener('click', resumeAudio);
+            // Function to wrap words in spans
+            function wrapWordsInSpans() {
+                paragraphs.forEach(paragraph => {
+                    const words = paragraph.textContent.split(/\s+/);
+                    paragraph.innerHTML = words.map(word =>
+                        `<span class="word">${word}&nbsp;</span>`
+                    ).join('');
                 });
             }
 
-            // Start the word reveal and audio simultaneously
-            await revealWord(0);
-            paragraphElement.classList.remove('animating'); // Allow next animation on the paragraph
-        }
+            // Wrap words initially
+            wrapWordsInSpans();
 
-        // Check which paragraph is in view
-        const observedParagraphs = new Set();
-        let inProgressAnimation = false;
+            // Function to show or hide the floating button
+            function toggleAudioButtonVisibility() {
+                const rect = blogSection.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
 
-        async function checkParagraphsInView() {
-            for (let i = 0; i < paragraphs.length; i++) {
-                const paragraph = paragraphs[i];
-
-                if (isElementInViewport(paragraph) && !observedParagraphs.has(paragraph)) {
-                    // If the paragraph is in view and hasn't been animated yet
-                    observedParagraphs.add(paragraph);
-                    await animateParagraph(paragraph, audioFiles[i], i);
-                } else if (!isElementInViewport(paragraph) && observedParagraphs.has(paragraph)) {
-                    // If the paragraph is no longer in view and the animation is in progress, complete it
-                    if (paragraph.classList.contains('animating')) {
-                        await animateParagraph(paragraph, audioFiles[i], i);
-                    }
-                    observedParagraphs.delete(paragraph);
+                if (rect.top < windowHeight && rect.bottom >= 0) {
+                    audioControlBtn.classList.add('visible');
+                } else {
+                    audioControlBtn.classList.remove('visible');
+                    if (currentAudio) currentAudio.pause();
+                    resetAudioControlIcon();
                 }
             }
-        }
 
-        // Function to reset the paragraph animation
-        function resetParagraphAnimation(paragraph) {
-            const words = paragraph.querySelectorAll('.word');
-            words.forEach(word => word.classList.remove('reveal')); // Remove the reveal class
-        }
+            // Function to reset audio control button icon
+            function resetAudioControlIcon() {
+                icon.classList.remove('fa-pause');
+                icon.classList.add('fa-play');
+                isPlaying = false;
+                if (animationTimeout) {
+                    clearTimeout(animationTimeout);
+                    animationTimeout = null;
+                }
+            }
 
-        // Utility function to check if an element is in the viewport
-        function isElementInViewport(el) {
-            const rect = el.getBoundingClientRect();
-            return rect.top < window.innerHeight * 0.9 && rect.bottom >= 0;
-        }
+            // Function to animate the paragraph and play audio
+            async function animateParagraph(paragraphElement, audioPath, paragraphIndex) {
+                if (paragraphElement.classList.contains('animating')) {
+                    return;
+                }
+                paragraphElement.classList.add('animating');
+                if (currentAudio) {
+                    currentAudio.pause();
+                }
+                const words = paragraphElement.querySelectorAll('.word');
+                currentWordIndex = 0;
+                currentAudio = new Audio(audioPath);
+                currentAudio.preload = 'auto';
+                currentAudio.muted = true;
+                currentParagraphIndex = paragraphIndex;
+                icon.classList.remove('fa-play');
+                icon.classList.add('fa-pause');
+                isPlaying = true;
 
-        // Throttled scroll event
-        let rafId = null;
-        function onScroll() {
-            if (rafId) cancelAnimationFrame(rafId);
-            rafId = requestAnimationFrame(() => {
-                toggleAudioButtonVisibility();
-                checkParagraphsInView();
-            });
-        }
+                async function revealWord(index) {
+                    if (!isPlaying) return;
+                    if (index < words.length) {
+                        words[index].classList.add('reveal');
+                        currentWordIndex = index + 1;
+                        if (isPlaying) {
+                            animationTimeout = setTimeout(() => {
+                                revealWord(index + 1);
+                            }, 180);
+                        }
+                    }
+                }
 
-        // Audio control button behavior
-        audioControlBtn.addEventListener('click', () => {
-            if (currentAudio) {
-                if (isPlaying) {
+                // Audio end handler
+                function audioEndHandler() {
+                    icon.classList.remove('fa-pause');
+                    icon.classList.add('fa-play');
+                    isPlaying = false;
+                    currentAudio.removeEventListener('ended', audioEndHandler);
+                }
+                currentAudio.addEventListener('ended', audioEndHandler);
+
+                try {
+                    await currentAudio.play();
+                    currentAudio.muted = false;
+                } catch (error) {
+                    console.warn('Autoplay blocked, waiting for user interaction.', error);
+                    document.addEventListener('click', function resumeAudio() {
+                        currentAudio.play();
+                        currentAudio.muted = false;
+                        document.removeEventListener('click', resumeAudio);
+                    });
+                }
+
+                await revealWord(0);
+                paragraphElement.classList.remove('animating');
+            }
+
+            // Function to reset paragraph animation with sequential effect
+            function resetParagraphAnimation(paragraph) {
+                const words = paragraph.querySelectorAll('.word');
+                words.forEach((word, index) => {
+                    setTimeout(() => {
+                        word.classList.remove('reveal');
+                    }, index * 50); // Sequential reset with 50ms delay between words
+                });
+            }
+
+            // Check which paragraph is in view
+            const observedParagraphs = new Set();
+
+            async function checkParagraphsInView() {
+        const st = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollingUp = st < lastScrollTop;
+        lastScrollTop = st;
+
+        for (let i = 0; i < paragraphs.length; i++) {
+            const paragraph = paragraphs[i];
+            const isInView = isElementInViewport(paragraph);
+
+            if (scrollingUp && observedParagraphs.has(paragraph) && !isInView) {
+                // Only reset animation for paragraphs that are no longer in view
+                resetParagraphAnimation(paragraph);
+                observedParagraphs.delete(paragraph);
+                if (currentAudio && currentParagraphIndex === i) {
                     currentAudio.pause();
                     resetAudioControlIcon();
-                } else {
-                    currentAudio.play();
-                    icon.classList.remove('fa-play');
-                    icon.classList.add('fa-pause');
-                    isPlaying = true;
                 }
+            } else if (isInView && !observedParagraphs.has(paragraph) && !scrollingUp) {
+                // Animate when scrolling down and paragraph comes into view
+                observedParagraphs.add(paragraph);
+                await animateParagraph(paragraph, audioFiles[i], i);
             }
-        });
+        }
+    }
 
-        // Initial checks
-        window.addEventListener('scroll', onScroll);
-        window.addEventListener('resize', onScroll);
-        toggleAudioButtonVisibility();
-        checkParagraphsInView();
-    });
+
+            // Improved viewport detection
+            function isElementInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        const threshold = window.innerHeight * 0.3;
+        const elementHeight = rect.height;
+        
+        // Consider an element out of view when it's mostly scrolled past
+        const isOutOfView = rect.bottom < threshold || rect.top > (window.innerHeight - threshold);
+        
+        return !isOutOfView;
+    }
+
+            // Improved scroll handling
+            let scrollTimeout;
+            function onScroll() {
+                if (scrollTimeout) {
+                    cancelAnimationFrame(scrollTimeout);
+                }
+                scrollTimeout = requestAnimationFrame(() => {
+                    toggleAudioButtonVisibility();
+                    checkParagraphsInView();
+                });
+            }
+
+            // Audio control button behavior
+            const playSound = new Audio('sfx/play.mp3');
+            const pauseSound = new Audio('sfx/pause.mp3');
+
+            audioControlBtn.addEventListener('click', () => {
+                if (currentAudio) {
+                    if (isPlaying) {
+                        currentAudio.pause();
+                        resetAudioControlIcon();
+                        pauseSound.play();
+                    } else {
+                        currentAudio.play();
+                        icon.classList.remove('fa-play');
+                        icon.classList.add('fa-pause');
+                        isPlaying = true;
+                        playSound.play();
+                        const currentParagraph = paragraphs[currentParagraphIndex];
+                        if (currentParagraph) {
+                            const words = currentParagraph.querySelectorAll('.word');
+                            async function resumeAnimation(index) {
+                                if (!isPlaying) return;
+                                if (index < words.length) {
+                                    words[index].classList.add('reveal');
+                                    currentWordIndex = index + 1;
+                                    if (isPlaying) {
+                                        animationTimeout = setTimeout(() => {
+                                            resumeAnimation(index + 1);
+                                        }, 180);
+                                    }
+                                }
+                            }
+                            resumeAnimation(currentWordIndex);
+                        }
+                    }
+                }
+            });
+
+            // Initial checks
+            window.addEventListener('scroll', onScroll);
+            window.addEventListener('resize', onScroll);
+            toggleAudioButtonVisibility();
+            checkParagraphsInView();
+        });
 </script>
 </script>
     
