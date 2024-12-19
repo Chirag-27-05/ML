@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Idea of a Perceptron</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for icons -->
@@ -11,7 +11,148 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
     />
     <style>
-      .shimmer {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Main Section Styles */
+        .main-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 5rem 1.25rem;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        .date {
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .author {
+            color: #6b7280;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .image-container {
+            position: relative;
+            max-width: 28rem;
+            margin-top: 1.25rem;
+            overflow: hidden;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            transition: transform 1.2s ease-in-out, opacity 1.2s ease-in-out;
+            transform: scale(1.1);
+            opacity: 0;
+        }
+
+        .image-container img.visible {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .image-container::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 25%; /* Adjust height as needed */
+            background: linear-gradient(to top, from(#fff), to(transparent));
+            pointer-events: none;
+        }
+
+        .scroll-indicator {
+            margin-top: 5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scroll-circle {
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 2px solid #6b7280;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: bounce 1s infinite;
+        }
+
+        .scroll-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            background-color: #6b7280;
+            border-radius: 50%;
+        }
+
+        /* Blog Section Styles */
+        .blog-section {
+            width: 100%;
+            max-width: 48rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            margin-bottom: 8rem;
+        }
+
+        .blog-title {
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .blog-content {
+            font-size: 1.75rem; /* Increased base font size */
+            line-height: 1.6;
+            color: #4b5563;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .blog-content p {
+            margin-bottom: 1.65rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.1rem;
+        }
+
+        .word {
+            position: relative;
+            color: rgba(0, 0, 0, 0.2);
+            transition: color 0.5s ease-in-out;
+        }
+
+        .word.reveal {
+            color: rgba(0, 0, 0, 1);
+        }
+
+        .shimmer {
         display: inline-block;
         color: white;
         background: #222222 -webkit-gradient(linear, 100% 0, 0 0, from(#acacac), color-stop(0.5, #ffffff), to(#acacac));
@@ -38,137 +179,348 @@
         }
       }
 
-      .image-container {
-        position: relative;
-        overflow: hidden; /* Ensures the image stays inside the container */
-      }
+        /* Shimmer Animation */
+        @-webkit-keyframes shimmer {
+            0% { background-position: -4rem top; }
+            70% { background-position: 29.5rem top; }
+            100% { background-position: 29.5rem top; }
+        }
 
-      .image-container img {
-        transition: transform 1.2s ease-in-out, opacity 1.2s ease-in-out; /* Smooth transition for zoom and fade */
-        transform: scale(1.1); /* Initial zoom-out state */
-        opacity: 0; /* Initially hidden */
-      }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
 
-      .image-container img.visible {
-        transform: scale(1); /* Zooms to original size */
-        opacity: 1; /* Becomes visible */
-      }
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+         
+
+          
+            .blog-title{
+             font-size:1.5rem ; 
+             text-align: left;
+            }
+
+            .blog-content {
+                font-size: 1.2rem;
+                text-align:justify;
+            }
+        }
+
+        @media (max-width: 480px) {
+          
+
+          
+
+          .blog-title{
+            text-align: left;
+             font-size:1.5rem ; 
+            }
+            .blog-content {
+                text-align: justify;
+                font-size: 1.2rem;
+            }
+        }
+
+
+
+         /* Audio Control Button Styles */
+         .audio-control-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            color: white;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.2s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .audio-control-btn.visible {
+            opacity: 1;
+        }
+
+        .audio-control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .audio-control-btn i {
+            font-size: 24px;
+        }
+
     </style>
-  </head>
-  <body class="bg-white text-black flex flex-col items-center justify-center min-h-screen">
-    <!-- Main Container -->
-    <main class="flex flex-col items-center justify-center text-center p-5 w-full min-h-screen pt-20">
-      <!-- Date -->
-      <p class="text-gray-600 text-sm font-semibold tracking-tight mb-2">16/12/2024</p>
+</head>
+<body>
+  <main class="flex flex-col items-center justify-center text-center p-5 w-full min-h-screen pt-20">
+    <!-- Date -->
+    <p class="text-gray-600 text-sm font-semibold tracking-tight mb-2">16/12/2024</p>
 
-      <!-- Title and Author -->
-      <div class="mb-5">
-        <h1 class="text-3xl font-bold shimmer mb-1 tracking-tighter">
-          The Idea Of A Perceptron
-        </h1>
-        <p class="text-gray-600 text-lg font-semibold">Chirag Jalade</p>
+    <!-- Title and Author -->
+    <div class="mb-5">
+      <h1 class=" text-3xl font-bold shimmer mb-1 tracking-tighter">
+        The Idea Of A Perceptron
+      </h1>
+
+      <p class="text-gray-600 text-lg font-semibold">Chirag Jalade</p>
+    </div>
+
+    <!-- New Text Divs with Icons -->
+    <div class="flex justify-center space-x-8 mb-0">
+      <!-- Read the Docs -->
+      <div class="flex items-center space-x-2 text-gray-600 hover:text-black cursor-pointer">
+        <!-- Book Icon -->
+        <i class="fas fa-file-alt text-black text-sm"></i>
+        <span class="text-lg">Read the Docs</span>
       </div>
+      <!-- Read References -->
+      <div class="flex items-center space-x-2 text-gray-600 hover:text-black cursor-pointer">
+        <!-- File Icon -->
+        <i class="fas fa-university text-black text-sm"></i>
+        <span class="text-lg">Read References</span>
+      </div>
+    </div>
 
-      <!-- New Text Divs with Icons -->
-      <div class="flex justify-center space-x-8 mb-0">
-        <!-- Read the Docs -->
-        <div class="flex items-center space-x-2 text-gray-600 hover:text-black cursor-pointer">
-          <!-- Book Icon -->
-          <i class="fas fa-book text-black text-sm"></i>
-          <span class="text-lg">Read the Docs</span>
+    <!-- Image Container -->
+    <div class="image-container relative flex justify-center items-center max-w-md mt-5">
+      <img
+        src="images/perceptron.png"
+        alt="Perceptron Visual Representation"
+        class="w-full h-auto block"
+      />
+      <div
+        class="absolute bottom-0 w-full h-1/4 bg-gradient-to-t from-white to-transparent pointer-events-none"
+      ></div>
+    </div>
+
+    <!-- Scroll Down Circle -->
+    <div class="mt-20 flex justify-center items-center">
+      <div class="animate-bounce w-10 h-10 border-2 border-gray-600 rounded-full flex items-center justify-center">
+        <div class="w-2 h-2 bg-gray-600 rounded-full"></div>
+      </div>
+    </div>
+  </main>
+
+    <section class="blog-section">
+        <h2 class="blog-title">The Birth of the Perceptron</h2>
+        <div class="blog-content">
+            <p id="para1">The perceptron, introduced by Frank Rosenblatt in 1958, was inspired by the structure and function of the biological neuron. Neurons in the human brain process information by receiving input signals through dendrites, performing computations in the cell body, and transmitting outputs via axons. Similarly, a perceptron takes input values, applies weights, sums them, and passes the result through an activation function to produce an output.</p>
+            <p id="para2">Rosenblatt's perceptron was a significant milestone in the field of artificial intelligence. It was the first algorithmically described neural network model, capable of learning and recognizing patterns from data. This simple yet profound model laid the groundwork for modern deep learning networks, demonstrating how machines could mimic human-like decision-making inspired by the brain's neuron structure.</p>
+            <p id="para3">While the original perceptron was limited to solving linear problems, its foundational principles evolved into multi-layered networks capable of solving complex, non-linear tasks. Today, the perceptron's legacy lives on in the AI systems we interact with every day.</p>
         </div>
-        <!-- Read References -->
-        <div class="flex items-center space-x-2 text-gray-600 hover:text-black cursor-pointer">
-          <!-- File Icon -->
-          <i class="fas fa-file-alt text-black text-sm"></i>
-          <span class="text-lg">Read References</span>
-        </div>
-      </div>
-
-      <!-- Image Container -->
-      <div class="image-container relative flex justify-center items-center max-w-md mt-5">
-        <img
-          src="images/perceptron.png"
-          alt="Perceptron Visual Representation"
-          class="w-full h-auto block"
-        />
-        <div
-          class="absolute bottom-0 w-full h-1/4 bg-gradient-to-t from-white to-transparent pointer-events-none"
-        ></div>
-      </div>
-
-      <!-- Scroll Down Circle -->
-      <div class="mt-20 flex justify-center items-center">
-        <div class="animate-bounce w-10 h-10 border-2 border-gray-600 rounded-full flex items-center justify-center">
-          <div class="w-2 h-2 bg-gray-600 rounded-full"></div>
-        </div>
-      </div>
-    </main>
-
-    <!-- Blog Section -->
-    <section
-      class="mt-10 p-5 bg-gray-100 rounded-lg shadow-md text-left max-w-3xl mx-auto"
-    >
-      <h2
-        class="text-2xl font-bold mb-3 text-gray-800 text-center tracking-tight"
-      >
-        The Birth of the Perceptron
-      </h2>
-      <p class="text-gray-700 text-base leading-relaxed mb-4 text-justify">
-        The perceptron, introduced by <strong>Frank Rosenblatt</strong> in 1958, was inspired by the structure and
-        function of the biological neuron. Neurons in the human brain process information by receiving input signals
-        through dendrites, performing computations in the cell body, and transmitting outputs via axons. Similarly, a
-        perceptron takes input values, applies weights, sums them, and passes the result through an activation function
-        to produce an output.
-      </p>
-      <p class="text-gray-700 text-base leading-relaxed mb-4 text-justify">
-        Rosenblatt's perceptron was a significant milestone in the field of artificial intelligence. It was the first
-        algorithmically described neural network model, capable of learning and recognizing patterns from data. This
-        simple yet profound model laid the groundwork for modern deep learning networks, demonstrating how machines
-        could mimic human-like decision-making inspired by the brain's neuron structure.
-      </p>
-      <p class="text-gray-700 text-base leading-relaxed text-justify">
-        While the original perceptron was limited to solving linear problems, its foundational principles evolved into
-        multi-layered networks capable of solving complex, non-linear tasks. Today, the perceptron's legacy lives on in
-        the AI systems we interact with every day.
-      </p>
     </section>
 
-    <!-- Responsive Adjustments -->
-    <style>
-      @media (max-width: 768px) {
-        .text-4xl {
-          font-size: 1.8rem;
-        }
-        .text-lg {
-          font-size: 1rem;
-        }
-        .text-2xl {
-          font-size: 1.5rem;
-        }
-        .p-5 {
-          padding: 1.5rem;
-        }
-      }
-    </style>
+    <div class="audio-control-btn">
+        <i class="fas fa-play"></i>
+    </div>
 
-    <!-- Script for Image Reveal -->
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const img = document.querySelector(".image-container img");
+        // Image Reveal
+        document.addEventListener("DOMContentLoaded", function () {
+            const img = document.querySelector(".image-container img");
+            const revealImage = () => {
+                const rect = img.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom >= 0) {
+                    img.classList.add("visible");
+                    window.removeEventListener("scroll", revealImage);
+                }
+            };
+            window.addEventListener("scroll", revealImage);
+            revealImage();
+        });
 
-        const revealImage = () => {
-          const rect = img.getBoundingClientRect();
-          if (rect.top < window.innerHeight && rect.bottom >= 0) {
-            img.classList.add("visible");
-            window.removeEventListener("scroll", revealImage); // Remove the event listener after reveal
-          }
-        };
+        document.addEventListener("DOMContentLoaded", function () {
+        const audioControlBtn = document.querySelector('.audio-control-btn');
+        const icon = audioControlBtn.querySelector('i');
 
-        window.addEventListener("scroll", revealImage);
-        revealImage(); // Trigger on page load
-      });
-    </script>
-  </body>
+        const audioFiles = [
+            'audio/one.mp3',
+            'audio/two.mp3',
+            'audio/three.mp3'
+        ];
+
+        let currentAudio = null;
+        let isPlaying = false;
+        let currentParagraphIndex = -1;
+
+        const blogSection = document.querySelector('.blog-section');
+        const paragraphs = document.querySelectorAll('.blog-content p');
+
+        // Function to wrap words in spans
+        function wrapWordsInSpans() {
+            paragraphs.forEach(paragraph => {
+                const words = paragraph.textContent.split(/\s+/);
+                paragraph.innerHTML = words.map(word =>
+                    `<span class="word">${word}&nbsp;</span>`
+                ).join('');
+            });
+        }
+
+        // Wrap words initially
+        wrapWordsInSpans();
+
+        // Function to show or hide the floating button
+        function toggleAudioButtonVisibility() {
+            const rect = blogSection.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+
+            if (rect.top < windowHeight && rect.bottom >= 0) {
+                audioControlBtn.classList.add('visible');
+            } else {
+                audioControlBtn.classList.remove('visible');
+                if (currentAudio) currentAudio.pause();
+                resetAudioControlIcon();
+            }
+        }
+
+        // Function to reset audio control button icon
+        function resetAudioControlIcon() {
+            icon.classList.remove('fa-pause');
+            icon.classList.add('fa-play');
+            isPlaying = false;
+        }
+
+        // Function to animate the paragraph and play audio
+        async function animateParagraph(paragraphElement, audioPath, paragraphIndex) {
+            // Prevent simultaneous animations for the same paragraph
+            if (paragraphElement.classList.contains('animating')) {
+                return;
+            }
+
+            paragraphElement.classList.add('animating');
+
+            // Stop previous audio
+            if (currentAudio) {
+                currentAudio.pause();
+            }
+
+            // Reset all previous reveals
+            const words = paragraphElement.querySelectorAll('.word');
+            words.forEach(word => word.classList.remove('reveal'));
+
+            // Create and preload new audio
+            currentAudio = new Audio(audioPath);
+            currentAudio.preload = 'auto';
+            currentAudio.muted = true; // Trick to bypass autoplay policy
+
+            currentParagraphIndex = paragraphIndex;
+
+            // Update play/pause icon
+            icon.classList.remove('fa-play');
+            icon.classList.add('fa-pause');
+            isPlaying = true;
+
+            // Word reveal function with Promise to ensure sequential animation
+            async function revealWord(index) {
+                if (index < words.length) {
+                    words[index].classList.add('reveal');
+                    await new Promise(resolve => setTimeout(resolve, 180)); // Delay between word reveals
+                    await revealWord(index + 1);
+                }
+            }
+
+            // Audio end handler
+            function audioEndHandler() {
+                icon.classList.remove('fa-pause');
+                icon.classList.add('fa-play');
+                isPlaying = false;
+                currentAudio.removeEventListener('ended', audioEndHandler);
+            }
+            currentAudio.addEventListener('ended', audioEndHandler);
+
+            // Start audio muted and unmute when playing
+            try {
+                await currentAudio.play();
+                currentAudio.muted = false;
+            } catch (error) {
+                console.warn('Autoplay blocked, waiting for user interaction.', error);
+                document.addEventListener('click', function resumeAudio() {
+                    currentAudio.play();
+                    currentAudio.muted = false;
+                    document.removeEventListener('click', resumeAudio);
+                });
+            }
+
+            // Start the word reveal and audio simultaneously
+            await revealWord(0);
+            paragraphElement.classList.remove('animating'); // Allow next animation on the paragraph
+        }
+
+        // Check which paragraph is in view
+        const observedParagraphs = new Set();
+        let inProgressAnimation = false;
+
+        async function checkParagraphsInView() {
+            for (let i = 0; i < paragraphs.length; i++) {
+                const paragraph = paragraphs[i];
+
+                if (isElementInViewport(paragraph) && !observedParagraphs.has(paragraph)) {
+                    // If the paragraph is in view and hasn't been animated yet
+                    observedParagraphs.add(paragraph);
+                    await animateParagraph(paragraph, audioFiles[i], i);
+                } else if (!isElementInViewport(paragraph) && observedParagraphs.has(paragraph)) {
+                    // If the paragraph is no longer in view and the animation is in progress, complete it
+                    if (paragraph.classList.contains('animating')) {
+                        await animateParagraph(paragraph, audioFiles[i], i);
+                    }
+                    observedParagraphs.delete(paragraph);
+                }
+            }
+        }
+
+        // Function to reset the paragraph animation
+        function resetParagraphAnimation(paragraph) {
+            const words = paragraph.querySelectorAll('.word');
+            words.forEach(word => word.classList.remove('reveal')); // Remove the reveal class
+        }
+
+        // Utility function to check if an element is in the viewport
+        function isElementInViewport(el) {
+            const rect = el.getBoundingClientRect();
+            return rect.top < window.innerHeight * 0.9 && rect.bottom >= 0;
+        }
+
+        // Throttled scroll event
+        let rafId = null;
+        function onScroll() {
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = requestAnimationFrame(() => {
+                toggleAudioButtonVisibility();
+                checkParagraphsInView();
+            });
+        }
+
+        // Audio control button behavior
+        audioControlBtn.addEventListener('click', () => {
+            if (currentAudio) {
+                if (isPlaying) {
+                    currentAudio.pause();
+                    resetAudioControlIcon();
+                } else {
+                    currentAudio.play();
+                    icon.classList.remove('fa-play');
+                    icon.classList.add('fa-pause');
+                    isPlaying = true;
+                }
+            }
+        });
+
+        // Initial checks
+        window.addEventListener('scroll', onScroll);
+        window.addEventListener('resize', onScroll);
+        toggleAudioButtonVisibility();
+        checkParagraphsInView();
+    });
+</script>
+</script>
+    
+</body>
 </html>
-
