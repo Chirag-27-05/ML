@@ -261,6 +261,131 @@
             font-size: 24px;
         }
 
+        .disable-animations-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 38px;
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            color: white;
+            cursor: pointer;
+            opacity: 1;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .disable-animations-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .disable-animations-btn i {
+            font-size: 18px;
+        }
+
+        /* Message Bubble */
+        .message-bubble {
+            position: fixed;
+            bottom: 105px; /* Position above the button */
+            right: 95px;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 24px;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            z-index: 999;
+            opacity: 0;
+            
+        }
+
+        /* Bubble Visible After Delay */
+        .message-bubble.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+
+        .settings-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(5px);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 998; /* Below the floating buttons */
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 10vh;
+        }
+
+        .settings-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .settings-content {
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .settings-title {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease 0.2s, transform 0.3s ease 0.2s;
+        }
+
+        .settings-overlay.visible .settings-title {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            opacity: 0;
+            transform: rotate(-90deg);
+            transition: opacity 0.3s ease 0.3s, transform 0.3s ease 0.3s;
+        }
+
+        .settings-overlay.visible .close-btn {
+            opacity: 1;
+            transform: rotate(0);
+        }
+
+        .close-btn:hover {
+            transform: rotate(90deg);
+            transition: transform 0.3s ease;
+        }
+
+        
+
     </style>
 </head>
 <body>
@@ -326,7 +451,52 @@
         <i class="fas fa-play"></i>
     </div>
 
+    <!-- Disable Animations Button -->
+    <div class="disable-animations-btn">
+        <i class="fas fa-magic"></i>
+    </div>
+
+
+    <div id="messageBubble" class="message-bubble">
+        Enable Or Disable Animations
+    </div>
+
+    <!-- Settings Overlay -->
+    <div id="settingsOverlay" class="settings-overlay">
+        <div class="settings-content">
+            <h2 class="settings-title">Settings</h2>
+            <button id="closeSettings" class="close-btn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    
+
     <script>
+        // Wait for the page to load completely
+        window.addEventListener("load", function() {
+    const messageBubble = document.getElementById("messageBubble");
+    // Show the message bubble after a 1-second delay
+    setTimeout(function() {
+        messageBubble.classList.add("show");
+    }, 1000);
+
+    // Add scroll event listener to hide the message bubble
+    let scrollTimeout;
+    window.addEventListener("scroll", function() {
+        // Clear any existing timeout
+        clearTimeout(scrollTimeout);
+        
+        // Hide the message bubble
+        messageBubble.classList.remove("show");
+        
+        // Optional: Remove the element completely after animation finishes
+        scrollTimeout = setTimeout(function() {
+            messageBubble.style.display = "none";
+        }, 500); // Wait for fade out animation to complete
+    });
+});
+    
         // Image Reveal
         document.addEventListener("DOMContentLoaded", function () {
             const img = document.querySelector(".image-container img");
@@ -340,28 +510,82 @@
             window.addEventListener("scroll", revealImage);
             revealImage();
         });
-
+    
         document.addEventListener("DOMContentLoaded", function () {
             const audioControlBtn = document.querySelector('.audio-control-btn');
             const icon = audioControlBtn.querySelector('i');
-
+            const blogContent = document.querySelector('.blog-content');
+    
             const audioFiles = [
                 'audio/one.mp3',
                 'audio/two.mp3',
                 'audio/three.mp3'
             ];
-
+    
             let currentAudio = null;
             let isPlaying = false;
             let currentParagraphIndex = -1;
             let animationTimeout = null;
             let currentWordIndex = 0;
             let lastScrollTop = 0; // Track scroll direction
-            
-
+            let animationsEnabled = true;
+    
+            // Create style tag for animation disabled state
+            const styleTag = document.createElement('style');
+            document.head.appendChild(styleTag);
+            styleTag.textContent = `
+                .blog-content.animations-disabled {
+                    position: relative;
+                }
+                
+                .blog-content.animations-disabled::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: white;
+                    pointer-events: none;
+                    z-index: 1;
+                }
+                
+                .blog-content.animations-disabled .text-overlay {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    z-index: 2;
+                    background: transparent;
+                }
+    
+                .blog-content.animations-disabled > p {
+                    position: relative;
+                    z-index: 0;
+                }
+    
+                .blog-content.animations-disabled .text-overlay p {
+                    color: black;
+                    margin-bottom: 1.65rem;
+                }
+    
+                .blog-content.animations-disabled .text-overlay .word {
+                    color: black !important;
+                    opacity: 1 !important;
+                    transform: translateY(0) !important;
+                    position: relative;
+                    display: inline-block;
+                }
+            `;
+    
+            // Create text overlay element
+            const textOverlay = document.createElement('div');
+            textOverlay.className = 'text-overlay';
+    
             const blogSection = document.querySelector('.blog-section');
             const paragraphs = document.querySelectorAll('.blog-content p');
-
+    
             // Function to wrap words in spans
             function wrapWordsInSpans() {
                 paragraphs.forEach(paragraph => {
@@ -371,15 +595,15 @@
                     ).join('');
                 });
             }
-
+    
             // Wrap words initially
             wrapWordsInSpans();
-
+    
             // Function to show or hide the floating button
             function toggleAudioButtonVisibility() {
                 const rect = blogSection.getBoundingClientRect();
                 const windowHeight = window.innerHeight;
-
+    
                 if (rect.top < windowHeight && rect.bottom >= 0) {
                     audioControlBtn.classList.add('visible');
                 } else {
@@ -388,7 +612,7 @@
                     resetAudioControlIcon();
                 }
             }
-
+    
             // Function to reset audio control button icon
             function resetAudioControlIcon() {
                 icon.classList.remove('fa-pause');
@@ -399,7 +623,7 @@
                     animationTimeout = null;
                 }
             }
-
+    
             // Function to animate the paragraph and play audio
             async function animateParagraph(paragraphElement, audioPath, paragraphIndex) {
                 if (paragraphElement.classList.contains('animating')) {
@@ -418,7 +642,7 @@
                 icon.classList.remove('fa-play');
                 icon.classList.add('fa-pause');
                 isPlaying = true;
-
+    
                 async function revealWord(index) {
                     if (!isPlaying) return;
                     if (index < words.length) {
@@ -431,8 +655,7 @@
                         }
                     }
                 }
-
-                // Audio end handler
+    
                 function audioEndHandler() {
                     icon.classList.remove('fa-pause');
                     icon.classList.add('fa-play');
@@ -440,7 +663,7 @@
                     currentAudio.removeEventListener('ended', audioEndHandler);
                 }
                 currentAudio.addEventListener('ended', audioEndHandler);
-
+    
                 try {
                     await currentAudio.play();
                     currentAudio.muted = false;
@@ -452,62 +675,65 @@
                         document.removeEventListener('click', resumeAudio);
                     });
                 }
-
+    
                 await revealWord(0);
                 paragraphElement.classList.remove('animating');
             }
-
-            // Function to reset paragraph animation with sequential effect
+    
+            // Function to reset paragraph animation with reverse sequential effect
             function resetParagraphAnimation(paragraph) {
-                const words = paragraph.querySelectorAll('.word');
-                words.forEach((word, index) => {
+                const words = Array.from(paragraph.querySelectorAll('.word'));
+                words.reverse().forEach((word, index) => {
                     setTimeout(() => {
                         word.classList.remove('reveal');
-                    }, index * 50); // Sequential reset with 50ms delay between words
+                    }, index * 50);
                 });
             }
+    
+            // Improved viewport detection
+            function isElementReadyForReset(paragraph) {
+            const rect = paragraph.getBoundingClientRect();
+            const lineHeight = parseInt(window.getComputedStyle(paragraph).lineHeight);
+            const totalLines = Math.ceil(rect.height / lineHeight);
+            const lastLinePosition = rect.top + (totalLines * lineHeight);
+            
+            // Check if the last line has just met the bottom of the viewport
+            return lastLinePosition <= window.innerHeight + lineHeight && lastLinePosition >= window.innerHeight - lineHeight;
+        }
 
-            // Check which paragraph is in view
-            const observedParagraphs = new Set();
+        // Keep the original isElementInViewport for animation entry
+        function isElementInViewport(el) {
+            const rect = el.getBoundingClientRect();
+            const threshold = window.innerHeight * 0.3;
+            return !(rect.bottom < threshold || rect.top > (window.innerHeight - threshold));
+        }
 
-            async function checkParagraphsInView() {
-        const st = window.pageYOffset || document.documentElement.scrollTop;
-        const scrollingUp = st < lastScrollTop;
-        lastScrollTop = st;
+        const observedParagraphs = new Set();
 
-        for (let i = 0; i < paragraphs.length; i++) {
-            const paragraph = paragraphs[i];
-            const isInView = isElementInViewport(paragraph);
+        async function checkParagraphsInView() {
+            const st = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollingUp = st < lastScrollTop;
+            lastScrollTop = st;
 
-            if (scrollingUp && observedParagraphs.has(paragraph) && !isInView) {
-                // Only reset animation for paragraphs that are no longer in view
-                resetParagraphAnimation(paragraph);
-                observedParagraphs.delete(paragraph);
-                if (currentAudio && currentParagraphIndex === i) {
-                    currentAudio.pause();
-                    resetAudioControlIcon();
+            for (let i = 0; i < paragraphs.length; i++) {
+                const paragraph = paragraphs[i];
+                const isInView = isElementInViewport(paragraph);
+                const shouldReset = isElementReadyForReset(paragraph);
+
+                if (scrollingUp && observedParagraphs.has(paragraph) && shouldReset) {
+                    resetParagraphAnimation(paragraph);
+                    observedParagraphs.delete(paragraph);
+                    if (currentAudio && currentParagraphIndex === i) {
+                        currentAudio.pause();
+                        resetAudioControlIcon();
+                    }
+                } else if (isInView && !observedParagraphs.has(paragraph) && !scrollingUp) {
+                    observedParagraphs.add(paragraph);
+                    await animateParagraph(paragraph, audioFiles[i], i);
                 }
-            } else if (isInView && !observedParagraphs.has(paragraph) && !scrollingUp) {
-                // Animate when scrolling down and paragraph comes into view
-                observedParagraphs.add(paragraph);
-                await animateParagraph(paragraph, audioFiles[i], i);
             }
         }
-    }
-
-
-            // Improved viewport detection
-            function isElementInViewport(el) {
-        const rect = el.getBoundingClientRect();
-        const threshold = window.innerHeight * 0.3;
-        const elementHeight = rect.height;
-        
-        // Consider an element out of view when it's mostly scrolled past
-        const isOutOfView = rect.bottom < threshold || rect.top > (window.innerHeight - threshold);
-        
-        return !isOutOfView;
-    }
-
+    
             // Improved scroll handling
             let scrollTimeout;
             function onScroll() {
@@ -519,11 +745,11 @@
                     checkParagraphsInView();
                 });
             }
-
+    
             // Audio control button behavior
             const playSound = new Audio('sfx/play.mp3');
             const pauseSound = new Audio('sfx/pause.mp3');
-
+    
             audioControlBtn.addEventListener('click', () => {
                 if (currentAudio) {
                     if (isPlaying) {
@@ -556,14 +782,89 @@
                     }
                 }
             });
-
+    
+            // Disable animations button functionality
+            const disableAnimationsBtn = document.querySelector('.disable-animations-btn');
+            
+            disableAnimationsBtn.addEventListener('click', () => {
+                animationsEnabled = !animationsEnabled;
+                
+                if (!animationsEnabled) {
+                    blogContent.classList.add('animations-disabled');
+                    textOverlay.innerHTML = blogContent.innerHTML;
+                    blogContent.appendChild(textOverlay);
+                    textOverlay.querySelectorAll('.word').forEach(word => {
+                        word.classList.add('reveal');
+                    });
+                } else {
+                    blogContent.classList.remove('animations-disabled');
+                    if (textOverlay.parentElement === blogContent) {
+                        blogContent.removeChild(textOverlay);
+                    }
+                }
+            });
+    
             // Initial checks
             window.addEventListener('scroll', onScroll);
             window.addEventListener('resize', onScroll);
             toggleAudioButtonVisibility();
             checkParagraphsInView();
         });
-</script>
+
+
+        // Add this to your existing DOMContentLoaded event listener
+document.addEventListener("DOMContentLoaded", function() {
+    // ... your existing code ...
+
+    // Settings overlay functionality
+    const disableAnimationsBtn = document.querySelector('.disable-animations-btn');
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    const closeSettingsBtn = document.getElementById('closeSettings');
+    
+    let pressTimer;
+    let isPressing = false;
+
+    // Handle long press
+    disableAnimationsBtn.addEventListener('mousedown', startPress);
+    disableAnimationsBtn.addEventListener('touchstart', startPress, { passive: true });
+    
+    disableAnimationsBtn.addEventListener('mouseup', endPress);
+    disableAnimationsBtn.addEventListener('mouseleave', endPress);
+    disableAnimationsBtn.addEventListener('touchend', endPress);
+    disableAnimationsBtn.addEventListener('touchcancel', endPress);
+
+    function startPress(e) {
+        isPressing = true;
+        pressTimer = setTimeout(() => {
+            if (isPressing) {
+                showSettingsOverlay();
+            }
+        }, 1200); // 1.2 second delay
+    }
+
+    function endPress() {
+        isPressing = false;
+        clearTimeout(pressTimer);
+    }
+
+    function showSettingsOverlay() {
+        settingsOverlay.classList.add('visible');
+    }
+
+    // Close overlay when clicking the close button
+    closeSettingsBtn.addEventListener('click', () => {
+        settingsOverlay.classList.remove('visible');
+    });
+
+    // Optional: Close overlay when clicking outside the content
+    settingsOverlay.addEventListener('click', (e) => {
+        if (e.target === settingsOverlay) {
+            settingsOverlay.classList.remove('visible');
+        }
+    });
+});
+
+    </script>
 </script>
     
 </body>
