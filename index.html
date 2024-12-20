@@ -321,8 +321,8 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.85);
-        backdrop-filter: blur(5px);
+        background-color: rgba(0, 0, 0, 0.90);
+        backdrop-filter: blur(12px);
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -379,9 +379,181 @@
             transform: rotate(0);
         }
 
-        .close-btn:hover {
-            transform: rotate(90deg);
+        
+
+
+        .settings-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .setting-btn {
+            
+            display: flex;
+            padding: 0.45rem 0; /* remove padding from the button*/
+            color: white;
+            font-size: 1.2rem;
+            text-decoration: none;
+            position: relative;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            opacity: 0;
+            transform: translateX(-40px);
+            border: none;
+        }
+
+
+        .setting-btn::after {
+            content: '';
+            position: absolute;
+            bottom: 0; /* Changed bottom to 0 to align it right below the text */
+            left: 0; /* Added Left to be 0 for start of text */
+            height: 1px; /* made it 1 px */
+            background-color: white;
+                width: auto; /* changed width to auto*/
+            transform: scaleX(0);
+            transform-origin: left;
             transition: transform 0.3s ease;
+        
+        }
+        .setting-btn::before {
+        content: '\2192';
+        position: absolute;
+            right: 0%;  /* adjust positioning based on padding */
+            top: 50%;
+            transform: translateY(-50%) rotate(0deg); /* rotate to 0 initially */
+            font-size: 1.2rem;
+            opacity: 0;
+            transition:  opacity 0.3s ease, transform 0.3s ease;
+        }
+        .settings-overlay.visible .setting-btn {
+        opacity: 1;
+            transform: translateX(0);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) 0.2s, opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1) 0.2s;
+
+            }
+
+        .setting-btn:hover::after,
+        .setting-btn:focus::after {
+                transform: scaleX(1);
+            }
+        .setting-btn:hover::before,
+        .setting-btn:focus::before{
+                opacity: 1;
+                transform: translateY(-50%) rotate(-45deg); /* rotation to 45deg on hover*/
+            }
+            .setting-btn:hover,
+            .setting-btn:focus {
+                color: #dddddd; /* change color and not background on hover */
+                padding:  0.45rem 0.5rem; /* add padding on hover */
+            }
+        /* Video Player Styles */
+        .video-player-container {
+            position: relative;
+            width: 1920px/2;
+            height: 1080px/2;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            margin-top: 2rem;
+            border-radius: 10px; /* Added border radius */
+            background: transparent;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .video-player-container.visible {
+            opacity: 1;
+        }
+
+        .video-background {
+            position: absolute;
+            inset: 0;
+            border-radius: 10px; /* Added border radius */
+            background-color: rgba(0, 0, 0, 0.3);
+            filter: blur(8px);
+            z-index: 499;
+        }
+
+        .video-element {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px; /* Added border radius */
+            z-index: 500;
+        }
+
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 501;
+
+        }
+
+        .video-controls.hidden {
+        opacity: 0;
+        pointer-events: none; /* Prevent interaction when hidden */
+        transition: opacity 0.3s ease-in-out;
+        }
+
+        .control-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .control-button i {
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .video-seeker {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .video-seeker::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        body .blog-section .video-player-container.visible { /* Add more context */
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .video-player-container {
+                height: 60vh;
+            }
         }
 
         
@@ -444,6 +616,25 @@
             <p id="para1">The perceptron, introduced by Frank Rosenblatt in 1958, was inspired by the structure and function of the biological neuron. Neurons in the human brain process information by receiving input signals through dendrites, performing computations in the cell body, and transmitting outputs via axons. Similarly, a perceptron takes input values, applies weights, sums them, and passes the result through an activation function to produce an output.</p>
             <p id="para2">Rosenblatt's perceptron was a significant milestone in the field of artificial intelligence. It was the first algorithmically described neural network model, capable of learning and recognizing patterns from data. This simple yet profound model laid the groundwork for modern deep learning networks, demonstrating how machines could mimic human-like decision-making inspired by the brain's neuron structure.</p>
             <p id="para3">While the original perceptron was limited to solving linear problems, its foundational principles evolved into multi-layered networks capable of solving complex, non-linear tasks. Today, the perceptron's legacy lives on in the AI systems we interact with every day.</p>
+
+            
+            <!-- Add Video Player Container -->
+            <div class="video-player-container">
+                <div class="video-background"></div>
+                <video class="video-element">
+                    <source class="large-screen-video" src="videos/large.mp4" media="(min-width: 769px)" type="video/mp4">
+                    <source class="small-screen-video" src="videos/small.mp4" media="(max-width: 768px)" type="video/mp4">
+                </video>
+                <div class="video-controls">
+                    <button class="control-button mute-unmute">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <input type="range" class="video-seeker" min="0" max="100" value="0">
+                </div>
+            </div>
+
+            <p id="para4">While the original perceptron was limited to solving linear problems, its foundational principles evolved into multi-layered networks capable of solving complex, non-linear tasks. Today, the perceptron's legacy lives on in the AI systems we interact with every day.</p>
+            
         </div>
     </section>
 
@@ -462,40 +653,47 @@
     </div>
 
     <!-- Settings Overlay -->
-    <div id="settingsOverlay" class="settings-overlay">
-        <div class="settings-content">
-            <h2 class="settings-title">Settings</h2>
-            <button id="closeSettings" class="close-btn">
-                <i class="fas fa-times"></i>
-            </button>
+       <!-- Settings Overlay -->
+   <div id="settingsOverlay" class="settings-overlay">
+    <div class="settings-content">
+        <h2 class="settings-title">Settings</h2>
+        <!-- Settings Buttons -->
+         <div class="settings-buttons">
+            <a href="https://chiragjalade.com/blog" class="setting-btn">Blog Home</a>
+            <a href="https://chiragjalade.com/about" class="setting-btn">About Me</a>
+            <a href="https://chiragjalade.com/contact" class="setting-btn">Contact</a>
         </div>
+        <button id="closeSettings" class="close-btn">
+            <i class="fas fa-times"></i>
+        </button>
     </div>
+</div>
     
 
     <script>
         // Wait for the page to load completely
         window.addEventListener("load", function() {
-    const messageBubble = document.getElementById("messageBubble");
-    // Show the message bubble after a 1-second delay
-    setTimeout(function() {
-        messageBubble.classList.add("show");
-    }, 1000);
-
-    // Add scroll event listener to hide the message bubble
-    let scrollTimeout;
-    window.addEventListener("scroll", function() {
-        // Clear any existing timeout
-        clearTimeout(scrollTimeout);
-        
-        // Hide the message bubble
-        messageBubble.classList.remove("show");
-        
-        // Optional: Remove the element completely after animation finishes
-        scrollTimeout = setTimeout(function() {
-            messageBubble.style.display = "none";
-        }, 500); // Wait for fade out animation to complete
-    });
-});
+            const messageBubble = document.getElementById("messageBubble");
+            // Show the message bubble after a 1-second delay
+            setTimeout(function() {
+                messageBubble.classList.add("show");
+            }, 1000);
+    
+            // Add scroll event listener to hide the message bubble
+            let scrollTimeout;
+            window.addEventListener("scroll", function() {
+                // Clear any existing timeout
+                clearTimeout(scrollTimeout);
+    
+                // Hide the message bubble
+                messageBubble.classList.remove("show");
+    
+                // Optional: Remove the element completely after animation finishes
+                scrollTimeout = setTimeout(function() {
+                    messageBubble.style.display = "none";
+                }, 500); // Wait for fade out animation to complete
+            });
+        });
     
         // Image Reveal
         document.addEventListener("DOMContentLoaded", function () {
@@ -515,15 +713,22 @@
             const audioControlBtn = document.querySelector('.audio-control-btn');
             const icon = audioControlBtn.querySelector('i');
             const blogContent = document.querySelector('.blog-content');
+            const videoContainer = document.querySelector('.video-player-container');
+            const video = document.querySelector('.video-element');
+            let isVideoVisible = false;
+            const playSound = new Audio('sfx/play.mp3');
+            const videoControls = videoContainer.querySelector('.video-controls'); // get controls element
+    
     
             const audioFiles = [
                 'audio/one.mp3',
                 'audio/two.mp3',
-                'audio/three.mp3'
+                'audio/three.mp3',
+                'audio/three.mp3'  // added the fourth audio
             ];
     
             let currentAudio = null;
-            let isPlaying = false;
+            let isPlayingAudio = false;
             let currentParagraphIndex = -1;
             let animationTimeout = null;
             let currentWordIndex = 0;
@@ -537,7 +742,7 @@
                 .blog-content.animations-disabled {
                     position: relative;
                 }
-                
+    
                 .blog-content.animations-disabled::after {
                     content: '';
                     position: absolute;
@@ -549,7 +754,7 @@
                     pointer-events: none;
                     z-index: 1;
                 }
-                
+    
                 .blog-content.animations-disabled .text-overlay {
                     position: absolute;
                     top: 0;
@@ -584,14 +789,14 @@
             textOverlay.className = 'text-overlay';
     
             const blogSection = document.querySelector('.blog-section');
-            const paragraphs = document.querySelectorAll('.blog-content p');
+            const paragraphs = document.querySelectorAll('.blog-content p'); // dynamic paragraph selection
     
             // Function to wrap words in spans
             function wrapWordsInSpans() {
                 paragraphs.forEach(paragraph => {
                     const words = paragraph.textContent.split(/\s+/);
                     paragraph.innerHTML = words.map(word =>
-                        `<span class="word">${word}&nbsp;</span>`
+                        `<span class="word">${word} </span>`
                     ).join('');
                 });
             }
@@ -617,7 +822,7 @@
             function resetAudioControlIcon() {
                 icon.classList.remove('fa-pause');
                 icon.classList.add('fa-play');
-                isPlaying = false;
+                isPlayingAudio = false;
                 if (animationTimeout) {
                     clearTimeout(animationTimeout);
                     animationTimeout = null;
@@ -625,7 +830,7 @@
             }
     
             // Function to animate the paragraph and play audio
-            async function animateParagraph(paragraphElement, audioPath, paragraphIndex) {
+           async function animateParagraph(paragraphElement, audioPath, paragraphIndex) { // Modified function
                 if (paragraphElement.classList.contains('animating')) {
                     return;
                 }
@@ -635,20 +840,26 @@
                 }
                 const words = paragraphElement.querySelectorAll('.word');
                 currentWordIndex = 0;
-                currentAudio = new Audio(audioPath);
-                currentAudio.preload = 'auto';
-                currentAudio.muted = true;
+                 if (audioPath){
+                    currentAudio = new Audio(audioPath);
+                     currentAudio.preload = 'auto';
+                     currentAudio.muted = true;
+                 }
+                 else{
+                     currentAudio = null;
+                 }
+    
                 currentParagraphIndex = paragraphIndex;
                 icon.classList.remove('fa-play');
                 icon.classList.add('fa-pause');
-                isPlaying = true;
+                isPlayingAudio = true;
     
                 async function revealWord(index) {
-                    if (!isPlaying) return;
+                    if (!isPlayingAudio) return;
                     if (index < words.length) {
                         words[index].classList.add('reveal');
                         currentWordIndex = index + 1;
-                        if (isPlaying) {
+                        if (isPlayingAudio) {
                             animationTimeout = setTimeout(() => {
                                 revealWord(index + 1);
                             }, 180);
@@ -659,21 +870,26 @@
                 function audioEndHandler() {
                     icon.classList.remove('fa-pause');
                     icon.classList.add('fa-play');
-                    isPlaying = false;
-                    currentAudio.removeEventListener('ended', audioEndHandler);
+                    isPlayingAudio = false;
+                      if(currentAudio)
+                         currentAudio.removeEventListener('ended', audioEndHandler);
                 }
-                currentAudio.addEventListener('ended', audioEndHandler);
+               if(currentAudio)
+                    currentAudio.addEventListener('ended', audioEndHandler);
     
                 try {
-                    await currentAudio.play();
-                    currentAudio.muted = false;
+                    if(currentAudio)
+                     await currentAudio.play();
+                     if(currentAudio)
+                       currentAudio.muted = false;
                 } catch (error) {
                     console.warn('Autoplay blocked, waiting for user interaction.', error);
-                    document.addEventListener('click', function resumeAudio() {
-                        currentAudio.play();
-                        currentAudio.muted = false;
-                        document.removeEventListener('click', resumeAudio);
-                    });
+                     if(currentAudio)
+                        document.addEventListener('click', function resumeAudio() {
+                         currentAudio.play();
+                           currentAudio.muted = false;
+                         document.removeEventListener('click', resumeAudio);
+                         });
                 }
     
                 await revealWord(0);
@@ -696,44 +912,43 @@
             const lineHeight = parseInt(window.getComputedStyle(paragraph).lineHeight);
             const totalLines = Math.ceil(rect.height / lineHeight);
             const lastLinePosition = rect.top + (totalLines * lineHeight);
-            
+    
             // Check if the last line has just met the bottom of the viewport
             return lastLinePosition <= window.innerHeight + lineHeight && lastLinePosition >= window.innerHeight - lineHeight;
         }
-
+    
         // Keep the original isElementInViewport for animation entry
         function isElementInViewport(el) {
             const rect = el.getBoundingClientRect();
             const threshold = window.innerHeight * 0.3;
             return !(rect.bottom < threshold || rect.top > (window.innerHeight - threshold));
         }
-
+    
         const observedParagraphs = new Set();
-
-        async function checkParagraphsInView() {
+    
+       async function checkParagraphsInView() { // Modified check paragraphs function
             const st = window.pageYOffset || document.documentElement.scrollTop;
             const scrollingUp = st < lastScrollTop;
             lastScrollTop = st;
-
-            for (let i = 0; i < paragraphs.length; i++) {
-                const paragraph = paragraphs[i];
+           for (let i = 0; i < paragraphs.length; i++) {
+               const paragraph = paragraphs[i];
                 const isInView = isElementInViewport(paragraph);
-                const shouldReset = isElementReadyForReset(paragraph);
-
-                if (scrollingUp && observedParagraphs.has(paragraph) && shouldReset) {
+               const shouldReset = isElementReadyForReset(paragraph);
+                const audioPath = audioFiles[i]; // Dynamically get audio file
+               if (scrollingUp && observedParagraphs.has(paragraph) && shouldReset) {
                     resetParagraphAnimation(paragraph);
                     observedParagraphs.delete(paragraph);
                     if (currentAudio && currentParagraphIndex === i) {
+                     if(currentAudio)
                         currentAudio.pause();
                         resetAudioControlIcon();
                     }
                 } else if (isInView && !observedParagraphs.has(paragraph) && !scrollingUp) {
-                    observedParagraphs.add(paragraph);
-                    await animateParagraph(paragraph, audioFiles[i], i);
+                   observedParagraphs.add(paragraph);
+                   await animateParagraph(paragraph, audioPath, i);
                 }
-            }
+           }
         }
-    
             // Improved scroll handling
             let scrollTimeout;
             function onScroll() {
@@ -747,37 +962,97 @@
             }
     
             // Audio control button behavior
-            const playSound = new Audio('sfx/play.mp3');
             const pauseSound = new Audio('sfx/pause.mp3');
     
+            // Intersection Observer for video visibility
+            const videoObserver = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach(entry => {
+                        console.log("Video Container Intersection:", entry.isIntersecting, entry.target);
+                        isVideoVisible = entry.isIntersecting;
+                        if (isVideoVisible) {
+                            videoContainer.classList.add('visible');
+                            showControls();  // show controls when video is visible
+                            startAutoHideTimer(); // set auto-hide timer
+                        } else {
+                            videoContainer.classList.remove('visible');
+                        }
+                    });
+    
+                },
+                { threshold: 0 }
+            );
+            videoObserver.observe(videoContainer);
+    
+             // Function to show video controls
+             function showControls() {
+                videoControls.classList.remove('hidden');
+            }
+    
+            // Function to hide video controls
+            function hideControls() {
+               videoControls.classList.add('hidden');
+            }
+    
+    
+            let autoHideTimer;
+            // Function to start auto-hide timer
+            function startAutoHideTimer() {
+                if(autoHideTimer) clearTimeout(autoHideTimer);
+                autoHideTimer = setTimeout(hideControls, 1500); // Hide after 1.5 seconds
+            }
+    
+            // Event listener for click on video container to show controls
+            videoContainer.addEventListener('click', function(){
+                showControls(); // show on click
+                 startAutoHideTimer(); // reset timer
+            });
+    
+            // hide controls initially on load
+            videoControls.classList.add('hidden');
+    
+    
+    
             audioControlBtn.addEventListener('click', () => {
-                if (currentAudio) {
-                    if (isPlaying) {
-                        currentAudio.pause();
-                        resetAudioControlIcon();
-                        pauseSound.play();
-                    } else {
-                        currentAudio.play();
+                if (isVideoVisible) {
+                    if (video.paused) {
+                        video.play();
                         icon.classList.remove('fa-play');
                         icon.classList.add('fa-pause');
-                        isPlaying = true;
-                        playSound.play();
-                        const currentParagraph = paragraphs[currentParagraphIndex];
-                        if (currentParagraph) {
-                            const words = currentParagraph.querySelectorAll('.word');
-                            async function resumeAnimation(index) {
-                                if (!isPlaying) return;
-                                if (index < words.length) {
-                                    words[index].classList.add('reveal');
-                                    currentWordIndex = index + 1;
-                                    if (isPlaying) {
-                                        animationTimeout = setTimeout(() => {
-                                            resumeAnimation(index + 1);
-                                        }, 180);
+                    } else {
+                        video.pause();
+                        icon.classList.remove('fa-pause');
+                        icon.classList.add('fa-play');
+                    }
+                } else {
+                      if (currentAudio) {
+                        if (isPlayingAudio) {
+                            currentAudio.pause();
+                            resetAudioControlIcon();
+                            pauseSound.play();
+                        } else {
+                            currentAudio.play();
+                            icon.classList.remove('fa-play');
+                            icon.classList.add('fa-pause');
+                            isPlayingAudio = true;
+                            playSound.play();
+                            const currentParagraph = paragraphs[currentParagraphIndex];
+                            if (currentParagraph) {
+                                const words = currentParagraph.querySelectorAll('.word');
+                                async function resumeAnimation(index) {
+                                    if (!isPlayingAudio) return;
+                                    if (index < words.length) {
+                                        words[index].classList.add('reveal');
+                                        currentWordIndex = index + 1;
+                                        if (isPlayingAudio) {
+                                            animationTimeout = setTimeout(() => {
+                                                resumeAnimation(index + 1);
+                                            }, 180);
+                                        }
                                     }
                                 }
+                                resumeAnimation(currentWordIndex);
                             }
-                            resumeAnimation(currentWordIndex);
                         }
                     }
                 }
@@ -785,10 +1060,10 @@
     
             // Disable animations button functionality
             const disableAnimationsBtn = document.querySelector('.disable-animations-btn');
-            
+    
             disableAnimationsBtn.addEventListener('click', () => {
                 animationsEnabled = !animationsEnabled;
-                
+    
                 if (!animationsEnabled) {
                     blogContent.classList.add('animations-disabled');
                     textOverlay.innerHTML = blogContent.innerHTML;
@@ -810,60 +1085,116 @@
             toggleAudioButtonVisibility();
             checkParagraphsInView();
         });
-
-
+    
         // Add this to your existing DOMContentLoaded event listener
-document.addEventListener("DOMContentLoaded", function() {
-    // ... your existing code ...
-
-    // Settings overlay functionality
-    const disableAnimationsBtn = document.querySelector('.disable-animations-btn');
-    const settingsOverlay = document.getElementById('settingsOverlay');
-    const closeSettingsBtn = document.getElementById('closeSettings');
+        document.addEventListener("DOMContentLoaded", function() {
+            // ... your existing code ...
     
-    let pressTimer;
-    let isPressing = false;
+            // Settings overlay functionality
+            const disableAnimationsBtn = document.querySelector('.disable-animations-btn');
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const closeSettingsBtn = document.getElementById('closeSettings');
+         const settingBtns = document.querySelectorAll('.setting-btn')
+          const settingsTitle = document.querySelector('.settings-title')
+        
+        let pressTimer;
+        let isPressing = false;
 
-    // Handle long press
-    disableAnimationsBtn.addEventListener('mousedown', startPress);
-    disableAnimationsBtn.addEventListener('touchstart', startPress, { passive: true });
-    
-    disableAnimationsBtn.addEventListener('mouseup', endPress);
-    disableAnimationsBtn.addEventListener('mouseleave', endPress);
-    disableAnimationsBtn.addEventListener('touchend', endPress);
-    disableAnimationsBtn.addEventListener('touchcancel', endPress);
+        // Handle long press
+        disableAnimationsBtn.addEventListener('mousedown', startPress);
+        disableAnimationsBtn.addEventListener('touchstart', startPress, { passive: true });
+        
+        disableAnimationsBtn.addEventListener('mouseup', endPress);
+        disableAnimationsBtn.addEventListener('mouseleave', endPress);
+        disableAnimationsBtn.addEventListener('touchend', endPress);
+        disableAnimationsBtn.addEventListener('touchcancel', endPress);
 
-    function startPress(e) {
-        isPressing = true;
-        pressTimer = setTimeout(() => {
-            if (isPressing) {
-                showSettingsOverlay();
-            }
-        }, 1200); // 1.2 second delay
-    }
-
-    function endPress() {
-        isPressing = false;
-        clearTimeout(pressTimer);
-    }
-
-    function showSettingsOverlay() {
-        settingsOverlay.classList.add('visible');
-    }
-
-    // Close overlay when clicking the close button
-    closeSettingsBtn.addEventListener('click', () => {
-        settingsOverlay.classList.remove('visible');
-    });
-
-    // Optional: Close overlay when clicking outside the content
-    settingsOverlay.addEventListener('click', (e) => {
-        if (e.target === settingsOverlay) {
-            settingsOverlay.classList.remove('visible');
+        function startPress(e) {
+            isPressing = true;
+            pressTimer = setTimeout(() => {
+                if (isPressing) {
+                    showSettingsOverlay();
+                }
+            }, 1200); // 1.2 second delay
         }
-    });
-});
 
+        function endPress() {
+            isPressing = false;
+            clearTimeout(pressTimer);
+        }
+
+        function showSettingsOverlay() {
+           settingsOverlay.classList.add('visible');
+            settingsTitle.style.opacity = '1'
+            settingsTitle.style.transform = 'translateY(0)'
+            settingBtns.forEach((btn, index) => {
+                 setTimeout(() => {
+                   btn.style.opacity = '1'
+                   btn.style.transform = 'translateX(0)'
+                 }, index * 100);
+               })
+        }
+
+        function hideSettingsOverlay(){
+            settingsOverlay.classList.remove('visible');
+             settingsTitle.style.opacity = '0'
+            settingsTitle.style.transform = 'translateY(-20px)'
+        }
+
+        // Close overlay when clicking the close button
+        closeSettingsBtn.addEventListener('click', () => {
+            settingBtns.forEach((btn, index) => {
+                 setTimeout(() => {
+                     btn.style.opacity = '0'
+                     btn.style.transform = 'translateX(-20px)'
+                   }, index * 50);
+               })
+                 setTimeout(hideSettingsOverlay, 250);
+         });
+
+        // Optional: Close overlay when clicking outside the content
+        settingsOverlay.addEventListener('click', (e) => {
+            if (e.target === settingsOverlay) {
+                settingBtns.forEach((btn, index) => {
+                 setTimeout(() => {
+                     btn.style.opacity = '0'
+                     btn.style.transform = 'translate(-20px)'
+                   }, index * 50);
+               })
+               setTimeout(hideSettingsOverlay, 250);
+            }
+        });
+        });
+    
+        document.addEventListener("DOMContentLoaded", function() {
+            const videoContainer = document.querySelector('.video-player-container');
+            const video = document.querySelector('.video-element');
+            const muteBtn = document.querySelector('.mute-unmute');
+            const seeker = document.querySelector('.video-seeker');
+    
+            // Mute functionality
+            muteBtn.addEventListener('click', () => {
+                if (video.muted) {
+                    video.muted = false;
+                    muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                } else {
+                    video.muted = true;
+                    muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                }
+            });
+    
+            // Update seeker
+            video.addEventListener('timeupdate', () => {
+                const progress = (video.currentTime / video.duration) * 100;
+                seeker.value = progress;
+            });
+    
+            // Seek video
+            seeker.addEventListener('change', () => {
+                const time = (seeker.value / 100) * video.duration;
+                video.currentTime = time;
+            });
+        });
     </script>
 </script>
     
