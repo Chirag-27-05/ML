@@ -412,7 +412,6 @@ main .author {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding-top: 10vh;
 }
 
 .settings-overlay.visible {
@@ -421,12 +420,14 @@ main .author {
 }
 
 .settings-content {
+    padding-top: 8vh;
+    padding-bottom: 5vh;
     position: relative;
     padding-left: 8%;
     padding-right: 8%;
     width: 100%;
     max-width: 800px;
-    max-height: 90vh; /* Added max-height for the settings content */
+    max-height: 95vh; /* Added max-height for the settings content */
     overflow-y: auto; /* Added for scrolling*/
     scroll-behavior: smooth;
 
@@ -455,8 +456,11 @@ main .author {
 }
 
 .settings-title-bar{
+    width: 100%;
+    display: flex;
     position: relative;
     justify-content: space-between;
+    align-items: center;
 }
 
 .settings-overlay.visible .settings-title {
@@ -466,7 +470,7 @@ main .author {
 
 .close-btn {
     position: absolute;
-    top: 0;
+    top: 20%;
     right: 0;
     background: none;
     border: none;
